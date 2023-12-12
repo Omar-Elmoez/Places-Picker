@@ -1,9 +1,6 @@
 import { useRef, useState } from 'react';
-
-import Places from './components/Places.jsx';
+import { Modal, DeleteConfirmation, Places } from './components/index.js';
 import { AVAILABLE_PLACES } from './data.js';
-import Modal from './components/Modal.jsx';
-import DeleteConfirmation from './components/DeleteConfirmation.jsx';
 import logoImg from './assets/logo.png';
 
 function App() {
