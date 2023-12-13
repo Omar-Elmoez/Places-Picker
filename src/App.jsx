@@ -1,12 +1,37 @@
-import { useRef, useState } from 'react';
-import { Modal, DeleteConfirmation, Places } from './components/index.js';
-import { AVAILABLE_PLACES } from './data.js';
-import logoImg from './assets/logo.png';
+import { useEffect, useRef, useState } from "react";
+import { Modal, DeleteConfirmation, Places } from "./components/index.js";
+import { AVAILABLE_PLACES } from "./data.js";
+import logoImg from "./assets/logo.png";
+import { sortPlacesByDistance } from "./loc.js";
 
 function App() {
   const modal = useRef();
   const selectedPlace = useRef();
+  const [places, setPlaces] = useState([]);
   const [pickedPlaces, setPickedPlaces] = useState([]);
+
+  useEffect(() => {
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => {
+        const { latitude: lat, longitude: lon } = coords;
+        setPlaces(sortPlacesByDistance(AVAILABLE_PLACES, lat, lon));
+      },
+      (error) => {
+        if (error.code === error.PERMISSION_DENIED) {
+          // Handle the refused permission case here
+          setPlaces(AVAILABLE_PLACES);
+        }
+      }
+    );
+  }, []);
+
+  useEffect(() => {
+    const storedIds = JSON.parse(localStorage.getItem("selectedPlaces")) || [];
+    setPickedPlaces(() => {
+      const relatedPlaces = AVAILABLE_PLACES.filter(place => storedIds.includes(place.id));
+      return relatedPlaces;
+    })
+  }, [])
 
   function handleStartRemovePlace(id) {
     modal.current.open();
@@ -25,6 +50,16 @@ function App() {
       const place = AVAILABLE_PLACES.find((place) => place.id === id);
       return [place, ...prevPickedPlaces];
     });
+
+    const selectedIds = JSON.parse(
+      localStorage.getItem("selectedPlaces")
+    ) || [];
+    if (selectedIds.indexOf(id) === -1) {
+      localStorage.setItem(
+        "selectedPlaces",
+        JSON.stringify([id, ...selectedIds])
+      );
+    }
   }
 
   function handleRemovePlace() {
@@ -54,13 +89,14 @@ function App() {
       <main>
         <Places
           title="I'd like to visit ..."
-          fallbackText={'Select the places you would like to visit below.'}
+          fallbackText="Select the places you would like to visit below."
           places={pickedPlaces}
           onSelectPlace={handleStartRemovePlace}
         />
         <Places
           title="Available Places"
-          places={AVAILABLE_PLACES}
+          places={places}
+          fallbackText="Allow location permission to display places sorted by distance ..."
           onSelectPlace={handleSelectPlace}
         />
       </main>
