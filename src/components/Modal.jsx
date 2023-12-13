@@ -17,7 +17,7 @@ function Modal({ children, open, onClose }) {
     // if we don't handle it, the value of open will not change
     // and the UI will not be in sync with the state anymore.
     <dialog className="modal" ref={dialog} onClose={onClose}>
-      {children}
+      {open ? children : null}
     </dialog>,
     document.getElementById("modal")
   );

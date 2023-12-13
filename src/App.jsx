@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Modal, DeleteConfirmation, Places } from "./components/index.js";
 import { AVAILABLE_PLACES } from "./data.js";
 import logoImg from "./assets/logo.png";
@@ -58,7 +58,7 @@ function App() {
     }
   }
 
-  function handleRemovePlace() {
+  const handleRemovePlace = useCallback(function handleRemovePlace() {
     setPickedPlaces((prevPickedPlaces) =>
       prevPickedPlaces.filter((place) => place.id !== selectedPlace.current)
     );
@@ -71,7 +71,7 @@ function App() {
       (id) => id !== selectedPlace.current
     );
     localStorage.setItem("selectedPlaces", JSON.stringify(updatedStorageIds));
-  }
+  }, [])
 
   return (
     <>
